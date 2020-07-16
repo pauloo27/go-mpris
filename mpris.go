@@ -118,8 +118,8 @@ type PlaybackStatus string
 
 const (
 	PlaybackPlaying PlaybackStatus = "Playing"
-	PlaybackPaused                 = "Paused"
-	PlaybackStopped                = "Stopped"
+	PlaybackPaused  PlaybackStatus = "Paused"
+	PlaybackStopped PlaybackStatus = "Stopped"
 )
 
 func removeQuotes(s string) string {
@@ -138,12 +138,14 @@ type LoopStatus string
 
 const (
 	LoopNone     LoopStatus = "None"
-	LoopTrack               = "Track"
-	LoopPlaylist            = "Playlist"
+	LoopTrack    LoopStatus = "Track"
+	LoopPlaylist LoopStatus = "Playlist"
 )
 
 func (i *player) GetLoopStatus() LoopStatus {
-	return LoopStatus(getProperty(i.obj, playerInterface, "LoopStatus").String())
+	status := getProperty(i.obj, playerInterface, "LoopStatus").String()
+	status = strings.TrimSuffix(strings.TrimPrefix(status, `"`), `"`)
+	return LoopStatus(status)
 }
 
 func (i *player) GetRate() float64 {
