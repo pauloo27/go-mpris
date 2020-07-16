@@ -11,10 +11,10 @@ const (
 	dbusObjectPath          = "/org/mpris/MediaPlayer2"
 	propertiesChangedSignal = "org.freedesktop.DBus.Properties.PropertiesChanged"
 
-	baseInterface      = "org.mpris.MediaPlayer2"
-	playerInterface    = "org.mpris.MediaPlayer2.Player"
-	trackListInterface = "org.mpris.MediaPlayer2.TrackList"
-	playlistsInterface = "org.mpris.MediaPlayer2.Playlists"
+	BaseInterface      = "org.mpris.MediaPlayer2"
+	PlayerInterface    = "org.mpris.MediaPlayer2.Player"
+	TrackListInterface = "org.mpris.MediaPlayer2.TrackList"
+	PlaylistsInterface = "org.mpris.MediaPlayer2.Playlists"
 
 	getPropertyMethod = "org.freedesktop.DBus.Properties.Get"
 	setPropertyMethod = "org.freedesktop.DBus.Properties.Set"
@@ -46,7 +46,7 @@ func List(conn *dbus.Conn) ([]string, error) {
 
 	var mprisNames []string
 	for _, name := range names {
-		if strings.HasPrefix(name, baseInterface) {
+		if strings.HasPrefix(name, BaseInterface) {
 			mprisNames = append(mprisNames, name)
 		}
 	}
@@ -63,15 +63,15 @@ type base struct {
 }
 
 func (i *base) Raise() {
-	i.obj.Call(baseInterface+".Raise", 0)
+	i.obj.Call(BaseInterface+".Raise", 0)
 }
 
 func (i *base) Quit() {
-	i.obj.Call(baseInterface+".Quit", 0)
+	i.obj.Call(BaseInterface+".Quit", 0)
 }
 
 func (i *base) GetIdentity() string {
-	return getProperty(i.obj, baseInterface, "Identity").String()
+	return getProperty(i.obj, BaseInterface, "Identity").String()
 }
 
 type player struct {
@@ -79,39 +79,39 @@ type player struct {
 }
 
 func (i *player) Next() {
-	i.obj.Call(playerInterface+".Next", 0)
+	i.obj.Call(PlayerInterface+".Next", 0)
 }
 
 func (i *player) Previous() {
-	i.obj.Call(playerInterface+".Previous", 0)
+	i.obj.Call(PlayerInterface+".Previous", 0)
 }
 
 func (i *player) Pause() {
-	i.obj.Call(playerInterface+".Pause", 0)
+	i.obj.Call(PlayerInterface+".Pause", 0)
 }
 
 func (i *player) PlayPause() {
-	i.obj.Call(playerInterface+".PlayPause", 0)
+	i.obj.Call(PlayerInterface+".PlayPause", 0)
 }
 
 func (i *player) Stop() {
-	i.obj.Call(playerInterface+".Stop", 0)
+	i.obj.Call(PlayerInterface+".Stop", 0)
 }
 
 func (i *player) Play() {
-	i.obj.Call(playerInterface+".Play", 0)
+	i.obj.Call(PlayerInterface+".Play", 0)
 }
 
 func (i *player) Seek(offset int64) {
-	i.obj.Call(playerInterface+".Seek", 0, offset)
+	i.obj.Call(PlayerInterface+".Seek", 0, offset)
 }
 
 func (i *player) SetTrackPosition(trackId *dbus.ObjectPath, position int64) {
-	i.obj.Call(playerInterface+".SetPosition", 0, trackId, position)
+	i.obj.Call(PlayerInterface+".SetPosition", 0, trackId, position)
 }
 
 func (i *player) OpenUri(uri string) {
-	i.obj.Call(playerInterface+".OpenUri", 0, uri)
+	i.obj.Call(PlayerInterface+".OpenUri", 0, uri)
 }
 
 type PlaybackStatus string
@@ -123,7 +123,7 @@ const (
 )
 
 func (i *player) GetPlaybackStatus() PlaybackStatus {
-	variant, err := i.obj.GetProperty(playerInterface + ".PlaybackStatus")
+	variant, err := i.obj.GetProperty(PlayerInterface + ".PlaybackStatus")
 	if err != nil {
 		return ""
 	}
@@ -139,33 +139,37 @@ const (
 )
 
 func (i *player) GetLoopStatus() LoopStatus {
-	return LoopStatus(getProperty(i.obj, playerInterface, "LoopStatus").Value().(string))
+	return LoopStatus(getProperty(i.obj, PlayerInterface, "LoopStatus").Value().(string))
+}
+
+func (i *player) GetProperty(targetInterface, properityName string) dbus.Variant {
+	return getProperty(i.obj, targetInterface, properityName)
 }
 
 func (i *player) GetRate() float64 {
-	return getProperty(i.obj, playerInterface, "Rate").Value().(float64)
+	return getProperty(i.obj, PlayerInterface, "Rate").Value().(float64)
 }
 
 func (i *player) GetShuffle() bool {
-	return getProperty(i.obj, playerInterface, "Shuffle").Value().(bool)
+	return getProperty(i.obj, PlayerInterface, "Shuffle").Value().(bool)
 }
 
 func (i *player) GetMetadata() map[string]dbus.Variant {
-	return getProperty(i.obj, playerInterface, "Metadata").Value().(map[string]dbus.Variant)
+	return getProperty(i.obj, PlayerInterface, "Metadata").Value().(map[string]dbus.Variant)
 }
 
 func (i *player) GetVolume() float64 {
-	return getProperty(i.obj, playerInterface, "Volume").Value().(float64)
+	return getProperty(i.obj, PlayerInterface, "Volume").Value().(float64)
 }
 func (i *player) SetVolume(volume float64) {
-	setProperty(i.obj, playerInterface, "Volume", volume)
+	setProperty(i.obj, PlayerInterface, "Volume", volume)
 }
 
 func (i *player) GetPosition() int64 {
-	return getProperty(i.obj, playerInterface, "Position").Value().(int64)
+	return getProperty(i.obj, PlayerInterface, "Position").Value().(int64)
 }
 func (i *player) SetPosition(position float64) {
-	setProperty(i.obj, playerInterface, "Position", position)
+	setProperty(i.obj, PlayerInterface, "Position", position)
 }
 
 func New(conn *dbus.Conn, name string) *Player {
