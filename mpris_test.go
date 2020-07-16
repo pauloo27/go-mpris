@@ -6,7 +6,32 @@ import (
 	"github.com/godbus/dbus"
 )
 
-func TestReturnedValues(t *testing.T) {
+func checkPlayback(t *testing.T, player *Player) {
+	status := player.GetPlaybackStatus()
+
+	if status != PlaybackPlaying && status != PlaybackStopped && status != PlaybackPaused {
+		t.Errorf("%s is not a valid playback status", status)
+	} else {
+		t.Logf("Player playback status is %s", status)
+	}
+
+}
+
+func checkLoop(t *testing.T, player *Player) {
+	if !player.HasLoopStatus() {
+		t.Logf("Player don't have a loop status")
+		return
+	}
+	loopStatus := player.GetLoopStatus()
+
+	if loopStatus != LoopNone && loopStatus != LoopTrack && loopStatus != LoopPlaylist {
+		t.Errorf("%s is not a valid loop status", loopStatus)
+	} else {
+		t.Logf("Players loop status is %s", loopStatus)
+	}
+}
+
+func TestPlayer(t *testing.T) {
 	conn, err := dbus.SessionBus()
 	if err != nil {
 		t.Error(err)
@@ -26,19 +51,6 @@ func TestReturnedValues(t *testing.T) {
 
 	player := New(conn, name)
 
-	status := player.GetPlaybackStatus()
-
-	if status != PlaybackPlaying && status != PlaybackStopped && status != PlaybackPaused {
-		t.Errorf("%s is not a valid playback status", status)
-	} else {
-		t.Logf("Player %s playback status is %s", name, status)
-	}
-
-	loopStatus := player.GetLoopStatus()
-
-	if loopStatus != LoopNone && loopStatus != LoopTrack && loopStatus != LoopPlaylist {
-		t.Errorf("%s is not a valid loop status", loopStatus)
-	} else {
-		t.Logf("Player %s loop status is %s", name, loopStatus)
-	}
+	t.Run("Playback", func(t *testing.T) { checkPlayback(t, player) })
+	t.Run("Loop", func(t *testing.T) { checkLoop(t, player) })
 }
