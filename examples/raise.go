@@ -2,8 +2,9 @@ package main
 
 import (
 	"log"
+
+	"github.com/Pauloo27/go-mpris"
 	"github.com/godbus/dbus"
-	"github.com/emersion/go-mpris"
 )
 
 func main() {
