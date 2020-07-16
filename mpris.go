@@ -143,9 +143,7 @@ const (
 )
 
 func (i *player) GetLoopStatus() LoopStatus {
-	status := getProperty(i.obj, playerInterface, "LoopStatus").String()
-	status = strings.TrimSuffix(strings.TrimPrefix(status, `"`), `"`)
-	return LoopStatus(status)
+	return LoopStatus(removeQuotes(getProperty(i.obj, playerInterface, "LoopStatus").String()))
 }
 
 func (i *player) GetRate() float64 {
