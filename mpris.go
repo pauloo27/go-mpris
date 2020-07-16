@@ -150,6 +150,10 @@ func (i *player) GetProperty(targetInterface, properityName string) dbus.Variant
 	return getProperty(i.obj, targetInterface, properityName)
 }
 
+func (i *player) GetPlayerProperty(properityName string) dbus.Variant {
+	return getProperty(i.obj, PlayerInterface, properityName)
+}
+
 func (i *player) GetRate() float64 {
 	return getProperty(i.obj, PlayerInterface, "Rate").Value().(float64)
 }
