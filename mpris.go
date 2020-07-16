@@ -138,6 +138,10 @@ const (
 	LoopPlaylist LoopStatus = "Playlist"
 )
 
+func (i *player) HasLoopStatus() bool {
+	return getProperty(i.obj, PlayerInterface, "LoopStatus").Value() != nil
+}
+
 func (i *player) GetLoopStatus() LoopStatus {
 	return LoopStatus(getProperty(i.obj, PlayerInterface, "LoopStatus").Value().(string))
 }
