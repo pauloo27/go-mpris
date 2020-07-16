@@ -71,7 +71,7 @@ func (i *base) Quit() {
 }
 
 func (i *base) GetIdentity() string {
-	return getProperty(i.obj, BaseInterface, "Identity").String()
+	return getProperty(i.obj, BaseInterface, "Identity").Value().(string)
 }
 
 type player struct {
