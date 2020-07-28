@@ -176,8 +176,10 @@ func (i *player) SetVolume(volume float64) {
 func (i *player) GetPosition() int64 {
 	return getProperty(i.obj, PlayerInterface, "Position").Value().(int64)
 }
-func (i *player) SetPosition(position float64) {
-	setProperty(i.obj, PlayerInterface, "Position", position)
+
+func (i *player) SetPosition(position int64) {
+	trackId := i.GetMetadata()["mpris:trackid"].Value().(dbus.ObjectPath)
+	i.SetTrackPosition(&trackId, position)
 }
 
 func New(conn *dbus.Conn, name string) *Player {
