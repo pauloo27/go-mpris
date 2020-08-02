@@ -106,8 +106,9 @@ func (i *player) Seek(offset int64) {
 	i.obj.Call(PlayerInterface+".Seek", 0, offset)
 }
 
-func (i *player) SetTrackPosition(trackId *dbus.ObjectPath, position int64) {
-	i.obj.Call(PlayerInterface+".SetPosition", 0, trackId, position)
+func (i *player) SetTrackPosition(trackId *dbus.ObjectPath, position float64) {
+	convertedPosition := int64(position * 1000000)
+	i.obj.Call(PlayerInterface+".SetPosition", 0, trackId, convertedPosition)
 }
 
 func (i *player) OpenUri(uri string) {
@@ -177,7 +178,7 @@ func (i *player) GetPosition() int64 {
 	return getProperty(i.obj, PlayerInterface, "Position").Value().(int64)
 }
 
-func (i *player) SetPosition(position int64) {
+func (i *player) SetPosition(position float64) {
 	trackId := i.GetMetadata()["mpris:trackid"].Value().(dbus.ObjectPath)
 	i.SetTrackPosition(&trackId, position)
 }
