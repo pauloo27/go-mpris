@@ -127,7 +127,7 @@ func (i *player) Seek(offset float64) {
 	i.obj.Call(PlayerInterface+".Seek", 0, convertToMicroseconds(offset))
 }
 
-// SetTrackPosition sets the position of a track.
+// SetTrackPosition sets the position of a track. The position should be in seconds.
 func (i *player) SetTrackPosition(trackId *dbus.ObjectPath, position float64) {
 	i.obj.Call(PlayerInterface+".SetPosition", 0, trackId, convertToMicroseconds(position))
 }
@@ -210,12 +210,17 @@ func (i *player) SetVolume(volume float64) {
 	setProperty(i.obj, PlayerInterface, "Volume", volume)
 }
 
-// GetPosition returns the position of the current track.
+// GetLength returns the current track length in seconds.
+func (i *player) GetLength() float64 {
+	return convertToSeconds(i.GetMetadata()["mpris:length"].Value().(int64))
+}
+
+// GetPosition returns the position in seconds of the current track.
 func (i *player) GetPosition() float64 {
 	return convertToSeconds(getProperty(i.obj, PlayerInterface, "Position").Value().(int64))
 }
 
-// SetPosition sets the position of the current track.
+// SetPosition sets the position of the current track. The position should be in seconds.
 func (i *player) SetPosition(position float64) {
 	trackId := i.GetMetadata()["mpris:trackid"].Value().(dbus.ObjectPath)
 	i.SetTrackPosition(&trackId, position)
