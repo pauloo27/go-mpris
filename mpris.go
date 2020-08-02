@@ -41,6 +41,10 @@ func convertToMicroseconds(seconds float64) int64 {
 	return int64(seconds * 1000000)
 }
 
+func convertToSeconds(microseconds int64) float64 {
+	return float64(microseconds) / 1000000.0
+}
+
 // List lists the available players.
 func List(conn *dbus.Conn) ([]string, error) {
 	var names []string
@@ -207,8 +211,8 @@ func (i *player) SetVolume(volume float64) {
 }
 
 // GetPosition returns the position of the current track.
-func (i *player) GetPosition() int64 {
-	return getProperty(i.obj, PlayerInterface, "Position").Value().(int64)
+func (i *player) GetPosition() float64 {
+	return convertToSeconds(getProperty(i.obj, PlayerInterface, "Position").Value().(int64))
 }
 
 // SetPosition sets the position of the current track.
