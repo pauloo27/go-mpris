@@ -37,6 +37,10 @@ func setProperty(obj *dbus.Object, iface string, prop string, val interface{}) {
 	}
 }
 
+func convertToMicroseconds(seconds float64) int64 {
+	return int64(seconds * 1000000)
+}
+
 func List(conn *dbus.Conn) ([]string, error) {
 	var names []string
 	err := conn.BusObject().Call("org.freedesktop.DBus.ListNames", 0).Store(&names)
@@ -102,13 +106,12 @@ func (i *player) Play() {
 	i.obj.Call(PlayerInterface+".Play", 0)
 }
 
-func (i *player) Seek(offset int64) {
-	i.obj.Call(PlayerInterface+".Seek", 0, offset)
+func (i *player) Seek(offset float64) {
+	i.obj.Call(PlayerInterface+".Seek", 0, convertToMicroseconds(offset))
 }
 
 func (i *player) SetTrackPosition(trackId *dbus.ObjectPath, position float64) {
-	convertedPosition := int64(position * 1000000)
-	i.obj.Call(PlayerInterface+".SetPosition", 0, trackId, convertedPosition)
+	i.obj.Call(PlayerInterface+".SetPosition", 0, trackId, convertToMicroseconds(position))
 }
 
 func (i *player) OpenUri(uri string) {
