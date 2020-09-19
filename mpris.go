@@ -1,7 +1,6 @@
 package mpris
 
 import (
-	"log"
 	"strings"
 
 	"github.com/godbus/dbus"
@@ -20,21 +19,18 @@ const (
 	setPropertyMethod = "org.freedesktop.DBus.Properties.Set"
 )
 
-func getProperty(obj *dbus.Object, iface string, prop string) dbus.Variant {
+func getProperty(obj *dbus.Object, iface string, prop string) (dbus.Variant, error) {
 	result := dbus.Variant{}
 	err := obj.Call(getPropertyMethod, 0, iface, prop).Store(&result)
 	if err != nil {
-		log.Println("Warning: could not get dbus property:", iface, prop, err)
-		return dbus.Variant{}
+		return dbus.Variant{}, err
 	}
-	return result
+	return result, nil
 }
 
-func setProperty(obj *dbus.Object, iface string, prop string, val interface{}) {
+func setProperty(obj *dbus.Object, iface string, prop string, val interface{}) error {
 	call := obj.Call(setPropertyMethod, 0, iface, prop, dbus.MakeVariant(val))
-	if call.Err != nil {
-		log.Println("Warning: could not set dbus property:", iface, prop, call.Err)
-	}
+	return call.Err
 }
 
 func convertToMicroseconds(seconds float64) int64 {
@@ -73,18 +69,20 @@ type base struct {
 }
 
 // Raise raises player priority.
-func (i *base) Raise() {
-	i.obj.Call(BaseInterface+".Raise", 0)
+func (i *base) Raise() error {
+	return i.obj.Call(BaseInterface+".Raise", 0).Err
 }
 
 // Quit closes the player.
-func (i *base) Quit() {
-	i.obj.Call(BaseInterface+".Quit", 0)
+func (i *base) Quit() error {
+	return i.obj.Call(BaseInterface+".Quit", 0).Err
 }
 
 // GetIdentity returns the player identity.
-func (i *base) GetIdentity() string {
-	return getProperty(i.obj, BaseInterface, "Identity").Value().(string)
+func (i *base) GetIdentity() (string, error) {
+	value, err := getProperty(i.obj, BaseInterface, "Identity")
+
+	return value.Value().(string), err
 }
 
 type player struct {
@@ -92,49 +90,49 @@ type player struct {
 }
 
 // Next skips to the next track in the tracklist.
-func (i *player) Next() {
-	i.obj.Call(PlayerInterface+".Next", 0)
+func (i *player) Next() error {
+	return i.obj.Call(PlayerInterface+".Next", 0).Err
 }
 
 // Previous skips to the previous track in the tracklist.
-func (i *player) Previous() {
-	i.obj.Call(PlayerInterface+".Previous", 0)
+func (i *player) Previous() error {
+	return i.obj.Call(PlayerInterface+".Previous", 0).Err
 }
 
 // Pause pauses the current track.
-func (i *player) Pause() {
-	i.obj.Call(PlayerInterface+".Pause", 0)
+func (i *player) Pause() error {
+	return i.obj.Call(PlayerInterface+".Pause", 0).Err
 }
 
 // PlayPause resumes the current track if it's paused and pauses it if it's playing.
-func (i *player) PlayPause() {
-	i.obj.Call(PlayerInterface+".PlayPause", 0)
+func (i *player) PlayPause() error {
+	return i.obj.Call(PlayerInterface+".PlayPause", 0).Err
 }
 
 // Stop stops the current track.
-func (i *player) Stop() {
-	i.obj.Call(PlayerInterface+".Stop", 0)
+func (i *player) Stop() error {
+	return i.obj.Call(PlayerInterface+".Stop", 0).Err
 }
 
 // Play starts or resumes the current track.
-func (i *player) Play() {
-	i.obj.Call(PlayerInterface+".Play", 0)
+func (i *player) Play() error {
+	return i.obj.Call(PlayerInterface+".Play", 0).Err
 }
 
 // Seek seeks the current track position by the offset. The offset should be in seconds.
 // If the offset is negative it's seeked back.
-func (i *player) Seek(offset float64) {
-	i.obj.Call(PlayerInterface+".Seek", 0, convertToMicroseconds(offset))
+func (i *player) Seek(offset float64) error {
+	return i.obj.Call(PlayerInterface+".Seek", 0, convertToMicroseconds(offset)).Err
 }
 
 // SetTrackPosition sets the position of a track. The position should be in seconds.
-func (i *player) SetTrackPosition(trackId *dbus.ObjectPath, position float64) {
-	i.obj.Call(PlayerInterface+".SetPosition", 0, trackId, convertToMicroseconds(position))
+func (i *player) SetTrackPosition(trackId *dbus.ObjectPath, position float64) error {
+	return i.obj.Call(PlayerInterface+".SetPosition", 0, trackId, convertToMicroseconds(position)).Err
 }
 
 // OpenUri opens and plays the uri if supported.
-func (i *player) OpenUri(uri string) {
-	i.obj.Call(PlayerInterface+".OpenUri", 0, uri)
+func (i *player) OpenUri(uri string) error {
+	return i.obj.Call(PlayerInterface+".OpenUri", 0, uri).Err
 }
 
 // PlaybackStatus the status of the playback. It can be "Playing", "Paused" or "Stopped".
@@ -147,12 +145,12 @@ const (
 )
 
 // GetPlaybackStatus gets the playback status.
-func (i *player) GetPlaybackStatus() PlaybackStatus {
+func (i *player) GetPlaybackStatus() (PlaybackStatus, error) {
 	variant, err := i.obj.GetProperty(PlayerInterface + ".PlaybackStatus")
 	if err != nil {
-		return ""
+		return "", err
 	}
-	return PlaybackStatus(variant.Value().(string))
+	return PlaybackStatus(variant.Value().(string)), nil
 }
 
 // LoopStatus the status of the player loop. It can be "None", "Track" or "Playlist".
@@ -164,45 +162,68 @@ const (
 	LoopPlaylist LoopStatus = "Playlist"
 )
 
-// HasLookStatus returns if the player support loop status.
-func (i *player) HasLoopStatus() bool {
-	return getProperty(i.obj, PlayerInterface, "LoopStatus").Value() != nil
+func (i *player) HasLoopStatus() (bool, error) {
+	value, err := getProperty(i.obj, PlayerInterface, "LoopStatus")
+	return value.Value() != nil, err
 }
 
 // GetLoopStatus returns the loop status.
-func (i *player) GetLoopStatus() LoopStatus {
-	return LoopStatus(getProperty(i.obj, PlayerInterface, "LoopStatus").Value().(string))
+func (i *player) GetLoopStatus() (LoopStatus, error) {
+	value, err := getProperty(i.obj, PlayerInterface, "LoopStatus")
+	if err != nil {
+		return LoopStatus(""), err
+	}
+	return LoopStatus(value.Value().(string)), nil
 }
 
 // GetProperty returns the properityName in the targetInterface.
-func (i *player) GetProperty(targetInterface, properityName string) dbus.Variant {
+func (i *player) GetProperty(targetInterface, properityName string) (dbus.Variant, error) {
 	return getProperty(i.obj, targetInterface, properityName)
 }
 
 // GetPlayerProperty returns the properityName from the player interface.
-func (i *player) GetPlayerProperty(properityName string) dbus.Variant {
+func (i *player) GetPlayerProperty(properityName string) (dbus.Variant, error) {
 	return getProperty(i.obj, PlayerInterface, properityName)
 }
 
 // Returns the current playback rate.
-func (i *player) GetRate() float64 {
-	return getProperty(i.obj, PlayerInterface, "Rate").Value().(float64)
+func (i *player) GetRate() (float64, error) {
+	value, err := getProperty(i.obj, PlayerInterface, "Rate")
+	if err != nil {
+		return 0.0, err
+	}
+
+	return value.Value().(float64), nil
 }
 
 // GetShuffle returns false if the player is going linearly through a playlist and false if it's
 // in some other order.
-func (i *player) GetShuffle() bool {
-	return getProperty(i.obj, PlayerInterface, "Shuffle").Value().(bool)
+func (i *player) GetShuffle() (bool, error) {
+	value, err := getProperty(i.obj, PlayerInterface, "Shuffle")
+
+	if err != nil {
+		return false, err
+	}
+
+	return value.Value().(bool), nil
 }
 
 // GetMetadata returns the metadata.
-func (i *player) GetMetadata() map[string]dbus.Variant {
-	return getProperty(i.obj, PlayerInterface, "Metadata").Value().(map[string]dbus.Variant)
+func (i *player) GetMetadata() (map[string]dbus.Variant, error) {
+	value, err := getProperty(i.obj, PlayerInterface, "Metadata")
+	if err != nil {
+		return nil, err
+	}
+	return value.Value().(map[string]dbus.Variant), nil
 }
 
 // GetVolume returns the volume.
-func (i *player) GetVolume() float64 {
-	return getProperty(i.obj, PlayerInterface, "Volume").Value().(float64)
+func (i *player) GetVolume() (float64, error) {
+	value, err := getProperty(i.obj, PlayerInterface, "Volume")
+	if err != nil {
+		return 0.0, err
+	}
+	return value.Value().(float64), nil
 }
 
 // SetVolume sets the volume.
@@ -211,19 +232,36 @@ func (i *player) SetVolume(volume float64) {
 }
 
 // GetLength returns the current track length in seconds.
-func (i *player) GetLength() float64 {
-	return convertToSeconds(i.GetMetadata()["mpris:length"].Value().(int64))
+func (i *player) GetLength() (float64, error) {
+	metadata, err := i.GetMetadata()
+	if err != nil {
+		return 0.0, err
+	}
+	return convertToSeconds(metadata["mpris:length"].Value().(int64)), nil
 }
 
 // GetPosition returns the position in seconds of the current track.
-func (i *player) GetPosition() float64 {
-	return convertToSeconds(getProperty(i.obj, PlayerInterface, "Position").Value().(int64))
+func (i *player) GetPosition() (float64, error) {
+	value, err := getProperty(i.obj, PlayerInterface, "Position")
+	if err != nil {
+		return 0.0, err
+	}
+
+	return convertToSeconds(value.Value().(int64)), nil
 }
 
 // SetPosition sets the position of the current track. The position should be in seconds.
-func (i *player) SetPosition(position float64) {
-	trackId := i.GetMetadata()["mpris:trackid"].Value().(dbus.ObjectPath)
+func (i *player) SetPosition(position float64) error {
+	metadata, err := i.GetMetadata()
+
+	if err != nil {
+		return err
+	}
+
+	trackId := metadata["mpris:trackid"].Value().(dbus.ObjectPath)
 	i.SetTrackPosition(&trackId, position)
+
+	return nil
 }
 
 // New connects the the player with the name in the connection conn.
