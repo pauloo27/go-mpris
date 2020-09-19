@@ -8,7 +8,13 @@ import (
 )
 
 func checkVolume(t *testing.T, player *Player) {
-	volume, _ := player.GetVolume()
+	volume, err := player.GetVolume()
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
 	t.Logf("Current player volume %f", volume)
 	player.SetVolume(0.5)
 	time.Sleep(1 * time.Second)
@@ -16,7 +22,12 @@ func checkVolume(t *testing.T, player *Player) {
 }
 
 func checkPlayback(t *testing.T, player *Player) {
-	status, _ := player.GetPlaybackStatus()
+	status, err := player.GetPlaybackStatus()
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
 
 	if status != PlaybackPlaying && status != PlaybackStopped && status != PlaybackPaused {
 		t.Errorf("%s is not a valid playback status", status)
@@ -27,11 +38,23 @@ func checkPlayback(t *testing.T, player *Player) {
 }
 
 func checkLoop(t *testing.T, player *Player) {
-	if loop, _ := player.HasLoopStatus(); !loop {
+	hasLoop, err := player.HasLoopStatus()
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if !hasLoop {
 		t.Logf("Player don't have a loop status")
 		return
 	}
-	loopStatus, _ := player.GetLoopStatus()
+	loopStatus, err := player.GetLoopStatus()
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
 
 	if loopStatus != LoopNone && loopStatus != LoopTrack && loopStatus != LoopPlaylist {
 		t.Errorf("%s is not a valid loop status", loopStatus)
@@ -44,12 +67,15 @@ func TestPlayer(t *testing.T) {
 	conn, err := dbus.SessionBus()
 	if err != nil {
 		t.Error(err)
+		return
 	}
 
 	names, err := List(conn)
 	if err != nil {
 		t.Error(err)
+		return
 	}
+
 	if len(names) == 0 {
 		t.Error("No players found")
 		return
