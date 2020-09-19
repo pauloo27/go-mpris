@@ -14,9 +14,11 @@ func main() {
 	}
 
 	names, err := mpris.List(conn)
+
 	if err != nil {
 		panic(err)
 	}
+
 	if len(names) == 0 {
 		log.Fatal("No media player found.")
 	}
@@ -26,7 +28,16 @@ func main() {
 
 	player := mpris.New(conn, name)
 
-	log.Println("Media player identity:", player.GetIdentity())
+	identity, err := player.GetIdentity()
 
-	player.Raise()
+	if err != nil {
+		panic(err)
+	}
+
+	log.Println("Media player identity:", identity)
+
+	err = player.Raise()
+	if err != nil {
+		panic(err)
+	}
 }
