@@ -31,7 +31,7 @@ func getProperty(obj *dbus.Object, iface string, prop string) dbus.Variant {
 }
 
 func setProperty(obj *dbus.Object, iface string, prop string, val interface{}) {
-	call := obj.Call(setPropertyMethod, 0, prop, val)
+	call := obj.Call(setPropertyMethod, 0, iface, prop, dbus.MakeVariant(val))
 	if call.Err != nil {
 		log.Println("Warning: could not set dbus property:", iface, prop, call.Err)
 	}
