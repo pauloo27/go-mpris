@@ -8,7 +8,7 @@ import (
 )
 
 func checkVolume(t *testing.T, player *Player) {
-	volume := player.GetVolume()
+	volume, _ := player.GetVolume()
 	t.Logf("Current player volume %f", volume)
 	player.SetVolume(0.5)
 	time.Sleep(1 * time.Second)
@@ -16,7 +16,7 @@ func checkVolume(t *testing.T, player *Player) {
 }
 
 func checkPlayback(t *testing.T, player *Player) {
-	status := player.GetPlaybackStatus()
+	status, _ := player.GetPlaybackStatus()
 
 	if status != PlaybackPlaying && status != PlaybackStopped && status != PlaybackPaused {
 		t.Errorf("%s is not a valid playback status", status)
@@ -27,11 +27,11 @@ func checkPlayback(t *testing.T, player *Player) {
 }
 
 func checkLoop(t *testing.T, player *Player) {
-	if !player.HasLoopStatus() {
+	if loop, _ := player.HasLoopStatus(); !loop {
 		t.Logf("Player don't have a loop status")
 		return
 	}
-	loopStatus := player.GetLoopStatus()
+	loopStatus, _ := player.GetLoopStatus()
 
 	if loopStatus != LoopNone && loopStatus != LoopTrack && loopStatus != LoopPlaylist {
 		t.Errorf("%s is not a valid loop status", loopStatus)
