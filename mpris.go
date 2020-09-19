@@ -227,8 +227,8 @@ func (i *player) GetVolume() (float64, error) {
 }
 
 // SetVolume sets the volume.
-func (i *player) SetVolume(volume float64) {
-	setProperty(i.obj, PlayerInterface, "Volume", volume)
+func (i *player) SetVolume(volume float64) error {
+	return setProperty(i.obj, PlayerInterface, "Volume", volume)
 }
 
 // GetLength returns the current track length in seconds.
