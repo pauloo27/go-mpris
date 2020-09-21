@@ -1,6 +1,7 @@
 package mpris
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/godbus/dbus"
@@ -150,6 +151,9 @@ func (i *player) GetPlaybackStatus() (PlaybackStatus, error) {
 	if err != nil {
 		return "", err
 	}
+	if variant.Value() == nil {
+		return "", fmt.Errorf("Variant value is nil")
+	}
 	return PlaybackStatus(variant.Value().(string)), nil
 }
 
@@ -169,11 +173,14 @@ func (i *player) HasLoopStatus() (bool, error) {
 
 // GetLoopStatus returns the loop status.
 func (i *player) GetLoopStatus() (LoopStatus, error) {
-	value, err := getProperty(i.obj, PlayerInterface, "LoopStatus")
+	variant, err := getProperty(i.obj, PlayerInterface, "LoopStatus")
 	if err != nil {
 		return LoopStatus(""), err
 	}
-	return LoopStatus(value.Value().(string)), nil
+	if variant.Value() == nil {
+		return "", fmt.Errorf("Variant value is nil")
+	}
+	return LoopStatus(variant.Value().(string)), nil
 }
 
 // GetProperty returns the properityName in the targetInterface.
@@ -188,42 +195,51 @@ func (i *player) GetPlayerProperty(properityName string) (dbus.Variant, error) {
 
 // Returns the current playback rate.
 func (i *player) GetRate() (float64, error) {
-	value, err := getProperty(i.obj, PlayerInterface, "Rate")
+	variant, err := getProperty(i.obj, PlayerInterface, "Rate")
 	if err != nil {
 		return 0.0, err
 	}
-
-	return value.Value().(float64), nil
+	if variant.Value() == nil {
+		return 0.0, fmt.Errorf("Variant value is nil")
+	}
+	return variant.Value().(float64), nil
 }
 
 // GetShuffle returns false if the player is going linearly through a playlist and false if it's
 // in some other order.
 func (i *player) GetShuffle() (bool, error) {
-	value, err := getProperty(i.obj, PlayerInterface, "Shuffle")
-
+	variant, err := getProperty(i.obj, PlayerInterface, "Shuffle")
 	if err != nil {
 		return false, err
 	}
-
-	return value.Value().(bool), nil
+	if variant.Value() == nil {
+		return false, fmt.Errorf("Variant value is nil")
+	}
+	return variant.Value().(bool), nil
 }
 
 // GetMetadata returns the metadata.
 func (i *player) GetMetadata() (map[string]dbus.Variant, error) {
-	value, err := getProperty(i.obj, PlayerInterface, "Metadata")
+	variant, err := getProperty(i.obj, PlayerInterface, "Metadata")
 	if err != nil {
 		return nil, err
 	}
-	return value.Value().(map[string]dbus.Variant), nil
+	if variant.Value() == nil {
+		return nil, fmt.Errorf("Variant value is nil")
+	}
+	return variant.Value().(map[string]dbus.Variant), nil
 }
 
 // GetVolume returns the volume.
 func (i *player) GetVolume() (float64, error) {
-	value, err := getProperty(i.obj, PlayerInterface, "Volume")
+	variant, err := getProperty(i.obj, PlayerInterface, "Volume")
 	if err != nil {
 		return 0.0, err
 	}
-	return value.Value().(float64), nil
+	if variant.Value() == nil {
+		return 0.0, fmt.Errorf("Variant value is nil")
+	}
+	return variant.Value().(float64), nil
 }
 
 // SetVolume sets the volume.
@@ -237,30 +253,35 @@ func (i *player) GetLength() (float64, error) {
 	if err != nil {
 		return 0.0, err
 	}
+	if metadata == nil || metadata["mpris:length"].Value() == nil {
+		return 0.0, fmt.Errorf("Variant value is nil")
+	}
 	return convertToSeconds(metadata["mpris:length"].Value().(int64)), nil
 }
 
 // GetPosition returns the position in seconds of the current track.
 func (i *player) GetPosition() (float64, error) {
-	value, err := getProperty(i.obj, PlayerInterface, "Position")
+	variant, err := getProperty(i.obj, PlayerInterface, "Position")
 	if err != nil {
 		return 0.0, err
 	}
-
-	return convertToSeconds(value.Value().(int64)), nil
+	if variant.Value() == nil {
+		return 0.0, fmt.Errorf("Variant value is nil")
+	}
+	return convertToSeconds(variant.Value().(int64)), nil
 }
 
 // SetPosition sets the position of the current track. The position should be in seconds.
 func (i *player) SetPosition(position float64) error {
 	metadata, err := i.GetMetadata()
-
 	if err != nil {
 		return err
 	}
-
+	if metadata == nil || metadata["mpris:trackid"].Value() == nil {
+		return fmt.Errorf("Variant value is nil")
+	}
 	trackId := metadata["mpris:trackid"].Value().(dbus.ObjectPath)
 	i.SetTrackPosition(&trackId, position)
-
 	return nil
 }
 
