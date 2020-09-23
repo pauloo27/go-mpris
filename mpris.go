@@ -166,11 +166,6 @@ const (
 	LoopPlaylist LoopStatus = "Playlist"
 )
 
-func (i *player) HasLoopStatus() (bool, error) {
-	value, err := getProperty(i.obj, PlayerInterface, "LoopStatus")
-	return value.Value() != nil, err
-}
-
 // GetLoopStatus returns the loop status.
 func (i *player) GetLoopStatus() (LoopStatus, error) {
 	variant, err := getProperty(i.obj, PlayerInterface, "LoopStatus")
@@ -181,6 +176,16 @@ func (i *player) GetLoopStatus() (LoopStatus, error) {
 		return "", fmt.Errorf("Variant value is nil")
 	}
 	return LoopStatus(variant.Value().(string)), nil
+}
+
+// SetProperty sets the value of a propertyName in the targetInterface.
+func (i *player) SetProperty(targetInterface, propertyName string, value interface{}) error {
+	return setProperty(i.obj, targetInterface, propertyName, value)
+}
+
+// SetPlayerProperty sets the propertyName from the player interface.
+func (i *player) SetPlayerProperty(propertyName string, value interface{}) error {
+	return setProperty(i.obj, PlayerInterface, propertyName, value)
 }
 
 // GetProperty returns the properityName in the targetInterface.
