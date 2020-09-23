@@ -178,6 +178,11 @@ func (i *player) GetLoopStatus() (LoopStatus, error) {
 	return LoopStatus(variant.Value().(string)), nil
 }
 
+// SetLoopStatus sets the loop status to loopStatus.
+func (i *player) SetLoopStatus(loopStatus LoopStatus) error {
+	return i.SetPlayerProperty("LoopStatus", loopStatus)
+}
+
 // SetProperty sets the value of a propertyName in the targetInterface.
 func (i *player) SetProperty(targetInterface, propertyName string, value interface{}) error {
 	return setProperty(i.obj, targetInterface, propertyName, value)
