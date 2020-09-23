@@ -38,17 +38,6 @@ func checkPlayback(t *testing.T, player *Player) {
 }
 
 func checkLoop(t *testing.T, player *Player) {
-	hasLoop, err := player.HasLoopStatus()
-
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if !hasLoop {
-		t.Logf("Player don't have a loop status")
-		return
-	}
 	loopStatus, err := player.GetLoopStatus()
 
 	if err != nil {
@@ -61,6 +50,14 @@ func checkLoop(t *testing.T, player *Player) {
 	} else {
 		t.Logf("Players loop status is %s", loopStatus)
 	}
+
+	err = player.SetLoopStatus(LoopTrack)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	player.SetLoopStatus(loopStatus)
 }
 
 func TestPlayer(t *testing.T) {
