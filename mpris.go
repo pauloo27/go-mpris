@@ -294,3 +294,19 @@ func New(conn *dbus.Conn, name string) *Player {
 
 	return &Player{conn, obj, name}
 }
+
+// OnSignal adds a handler to the player's properties change signal.
+func (i *Player) OnSignal(ch chan<- *dbus.Signal) (err error) {
+	err = i.conn.AddMatchSignal(
+		dbus.WithMatchSender(i.name),
+		dbus.WithMatchObjectPath(i.obj.Path()),
+		dbus.WithMatchInterface("org.freedesktop.DBus.Properties"),
+	)
+
+	if err != nil {
+		return
+	}
+
+	i.conn.Signal(ch)
+	return
+}
