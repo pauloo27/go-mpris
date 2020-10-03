@@ -6,7 +6,7 @@ A Go library for MPRIS.
 
 > $ go get github.com/Pauloo27/go-mpris
 
-_the dependency github.com/godbus/dbus is going to be installed as well._
+_the dependency github.com/godbus/dbus/v5 is going to be installed as well._
 
 
 ## Example
@@ -16,7 +16,7 @@ import (
 	"log"
 
 	"github.com/Pauloo27/go-mpris"
-	"github.com/godbus/dbus"
+	"github.com/godbus/dbus/v5"
 )
 
 func main() {
