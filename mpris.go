@@ -221,6 +221,11 @@ func (i *Player) GetShuffle() (bool, error) {
 	return variant.Value().(bool), nil
 }
 
+// SetShuffle sets the shuffle playlist mode.
+func (i *Player) SetShuffle(value bool) error {
+	return setProperty(i.obj, PlayerInterface, "Shuffle", value)
+}
+
 // GetMetadata returns the metadata.
 func (i *Player) GetMetadata() (map[string]dbus.Variant, error) {
 	variant, err := getProperty(i.obj, PlayerInterface, "Metadata")
