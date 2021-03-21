@@ -66,6 +66,11 @@ type Player struct {
 	name string
 }
 
+// GetName gets the player full name.
+func (i *Player) GetName() string {
+	return i.name
+}
+
 // Raise raises player priority.
 func (i *Player) Raise() error {
 	return i.obj.Call(BaseInterface+".Raise", 0).Err
