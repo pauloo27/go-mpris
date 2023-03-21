@@ -150,7 +150,7 @@ func (i *Player) GetPlaybackStatus() (PlaybackStatus, error) {
 		return "", err
 	}
 	if variant.Value() == nil {
-		return "", fmt.Errorf("Variant value is nil")
+		return "", fmt.Errorf("variant value is nil")
 	}
 	return PlaybackStatus(variant.Value().(string)), nil
 }
@@ -171,7 +171,7 @@ func (i *Player) GetLoopStatus() (LoopStatus, error) {
 		return LoopStatus(""), err
 	}
 	if variant.Value() == nil {
-		return "", fmt.Errorf("Variant value is nil")
+		return "", fmt.Errorf("variant value is nil")
 	}
 	return LoopStatus(variant.Value().(string)), nil
 }
@@ -208,7 +208,7 @@ func (i *Player) GetRate() (float64, error) {
 		return 0.0, err
 	}
 	if variant.Value() == nil {
-		return 0.0, fmt.Errorf("Variant value is nil")
+		return 0.0, fmt.Errorf("variant value is nil")
 	}
 	return variant.Value().(float64), nil
 }
@@ -221,7 +221,7 @@ func (i *Player) GetShuffle() (bool, error) {
 		return false, err
 	}
 	if variant.Value() == nil {
-		return false, fmt.Errorf("Variant value is nil")
+		return false, fmt.Errorf("variant value is nil")
 	}
 	return variant.Value().(bool), nil
 }
@@ -238,7 +238,7 @@ func (i *Player) GetMetadata() (map[string]dbus.Variant, error) {
 		return nil, err
 	}
 	if variant.Value() == nil {
-		return nil, fmt.Errorf("Variant value is nil")
+		return nil, fmt.Errorf("variant value is nil")
 	}
 	return variant.Value().(map[string]dbus.Variant), nil
 }
@@ -250,7 +250,7 @@ func (i *Player) GetVolume() (float64, error) {
 		return 0.0, err
 	}
 	if variant.Value() == nil {
-		return 0.0, fmt.Errorf("Variant value is nil")
+		return 0.0, fmt.Errorf("variant value is nil")
 	}
 	return variant.Value().(float64), nil
 }
@@ -267,7 +267,7 @@ func (i *Player) GetLength() (float64, error) {
 		return 0.0, err
 	}
 	if metadata == nil || metadata["mpris:length"].Value() == nil {
-		return 0.0, fmt.Errorf("Variant value is nil")
+		return 0.0, fmt.Errorf("variant value is nil")
 	}
 	return convertToSeconds(metadata["mpris:length"].Value().(int64)), nil
 }
@@ -279,7 +279,7 @@ func (i *Player) GetPosition() (float64, error) {
 		return 0.0, err
 	}
 	if variant.Value() == nil {
-		return 0.0, fmt.Errorf("Variant value is nil")
+		return 0.0, fmt.Errorf("variant value is nil")
 	}
 	return convertToSeconds(variant.Value().(int64)), nil
 }
@@ -291,7 +291,7 @@ func (i *Player) SetPosition(position float64) error {
 		return err
 	}
 	if metadata == nil || metadata["mpris:trackid"].Value() == nil {
-		return fmt.Errorf("Variant value is nil")
+		return fmt.Errorf("variant value is nil")
 	}
 	trackId := metadata["mpris:trackid"].Value().(dbus.ObjectPath)
 	i.SetTrackPosition(&trackId, position)
