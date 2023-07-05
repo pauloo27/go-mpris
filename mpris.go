@@ -269,7 +269,15 @@ func (i *Player) GetLength() (float64, error) {
 	if metadata == nil || metadata["mpris:length"].Value() == nil {
 		return 0.0, fmt.Errorf("variant value is nil")
 	}
-	return convertToSeconds(metadata["mpris:length"].Value().(int64)), nil
+	length := metadata["mpris:length"].Value()
+
+	switch l := length.(type) {
+	case int64:
+		return convertToSeconds(l), nil
+	case uint64:
+		return convertToSeconds(int64(l)), nil
+	}
+	return 0.0, fmt.Errorf("unknown type %T", length)
 }
 
 // GetPosition returns the position in seconds of the current track.
