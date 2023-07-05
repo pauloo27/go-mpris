@@ -301,7 +301,18 @@ func (i *Player) SetPosition(position float64) error {
 	if metadata == nil || metadata["mpris:trackid"].Value() == nil {
 		return fmt.Errorf("variant value is nil")
 	}
-	trackId := metadata["mpris:trackid"].Value().(dbus.ObjectPath)
+
+	rawTrackID := metadata["mpris:trackid"].Value()
+
+	var trackId dbus.ObjectPath
+
+	switch id := rawTrackID.(type) {
+	case dbus.ObjectPath:
+		trackId = id
+	case string:
+		trackId = dbus.ObjectPath(id)
+	}
+
 	i.SetTrackPosition(&trackId, position)
 	return nil
 }
